@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prywatny Menedżer Tokenów EVM</title>
+    <title>Bezpieczny Menedżer Tokenów EVM</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Ethers.js v6 CDN -->
@@ -14,65 +14,56 @@
         
         <!-- Nagłówek -->
         <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-            <h1 class="text-2xl font-bold text-emerald-400">Prywatna Sieć - Menedżer i Wysyłacz Tokenów</h1>
-            <p class="text-slate-400 text-sm mt-1">Zarządzaj swoim tokenem i wysyłaj go na dowolne adresy.</p>
+            <h1 class="text-2xl font-bold text-emerald-400">Bezpieczny Menedżer Tokenów</h1>
+            <p class="text-slate-400 text-sm mt-1">Zarządzaj i wysyłaj tokeny za pomocą portfela MetaMask (brak ryzyka wycieku klucza).</p>
         </header>
 
-        <!-- Sekcja Konfiguracji Sieci i Portfela -->
+        <!-- Sekcja Połączenia z Portfelem -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-blue-400">1. Konfiguracja Połączenia i Portfela</h2>
+            <h2 class="text-xl font-semibold text-blue-400">1. Połączenie z Portfelem i Siecią</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">RPC URL</label>
-                    <input type="text" id="rpcUrl" value="http://127.0.0.1:8545" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Natywna Waluta Sieci (Paliwo, np. POL, ETH)</label>
+                    <input type="text" id="nativeCurrency" value="POL" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Chain ID</label>
-                    <input type="text" id="chainId" value="31337" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Twój Adres Portfela</label>
+                    <input type="text" id="walletAddress" value="Nie połączono" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-400 font-mono">
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-300">Private Key</label>
-                <input type="text" id="privateKey" value="0xc3e1e0665c07e5c5d7c1c5f3dce06284c9492502646a792089c641dd09d2ddab" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-300">Wallet Address</label>
-                <input type="text" id="walletAddress" value="0x6D45764bf92668fFD006855fa573A3eA017030f0" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-500 font-mono">
-            </div>
+            <button onclick="connectWallet()" class="w-full bg-blue-600 hover:bg-blue-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Połącz z MetaMask / Portfelem
+            </button>
         </section>
 
-        <!-- Sekcja Kontraktu i Parametrów Tokena -->
+        <!-- Sekcja Kontraktu i Tokena -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-purple-400">2. Adres Kontraktu i Szczegóły Tokena</h2>
+            <h2 class="text-xl font-semibold text-purple-400">2. Adres Kontraktu Tokena</h2>
             
             <div>
-                <label class="block text-sm font-medium text-slate-300">Contract Address (Adres wdrożonego kontraktu tokena)</label>
+                <label class="block text-sm font-medium text-slate-300">Contract Address (Adres Twojego tokena)</label>
                 <input type="text" id="contractAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-purple-500/50 rounded-lg p-2.5 text-sm font-mono text-emerald-400 outline-none focus:ring-2 focus:ring-purple-500">
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Token Symbol</label>
+                    <label class="block text-sm font-medium text-slate-300">Symbol Tokena</label>
                     <input type="text" id="tokenSymbol" placeholder="np. MPT" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300">Decimals</label>
                     <input type="number" id="tokenDecimals" value="18" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Twoje Saldo</label>
-                    <input type="text" id="walletBalance" value="0" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-400 font-mono">
-                </div>
             </div>
 
             <button onclick="loadTokenInfo()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Załaduj / Sprawdź Token w Sieci
+                Sprawdź Token w Sieci
             </button>
         </section>
 
-        <!-- Sekcja Wysyłania Tokenów -->
+        <!-- Sekcja Wysyłania -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
             <h2 class="text-xl font-semibold text-emerald-400">3. Wyślij Token na Dowolny Adres</h2>
             
@@ -88,106 +79,114 @@
             </div>
 
             <button onclick="sendTokens()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Wyślij Tokeny
+                Wyślij Tokeny (Potwierdź w MetaMask)
             </button>
         </section>
 
-        <!-- Konsola / Status -->
+        <!-- Konsola -->
         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-400 h-32 overflow-y-auto" id="consoleLog">
-            [System] Gotowy do działania...
+            [System] Gotowy. Połącz portfel, aby rozpocząć...
         </div>
 
     </div>
 
     <script>
+        let provider;
+        let signer;
+
         function log(message) {
             const consoleBox = document.getElementById('consoleLog');
             consoleBox.innerHTML += `<div>> ${message}</div>`;
             consoleBox.scrollTop = consoleBox.scrollHeight;
         }
 
-        async function getProviderAndWallet() {
-            const rpcUrl = document.getElementById('rpcUrl').value;
-            const privateKey = document.getElementById('privateKey').value;
-            const provider = new ethers.JsonRpcProvider(rpcUrl);
-            const wallet = new ethers.Wallet(privateKey, provider);
-            return { provider, wallet };
+        async function connectWallet() {
+            if (!window.ethereum) {
+                alert("Nie wykryto portfela typu MetaMask w przeglądarce!");
+                return;
+            }
+            try {
+                log("Łączenie z portfelem...");
+                provider = new ethers.BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = await provider.getSigner();
+                const address = await signer.getAddress();
+                
+                document.getElementById('walletAddress').value = address;
+                log(`Połączono pomyślnie z adresem: ${address}`);
+            } catch (error) {
+                console.error(error);
+                log(`Błąd połączenia: ${error.message}`);
+            }
         }
 
         const ERC20_ABI = [
-            "function name() view returns (string)",
             "function symbol() view returns (string)",
             "function decimals() view returns (uint8)",
-            "function balanceOf(address account) view returns (uint256)",
             "function transfer(address recipient, uint256 amount) returns (bool)"
         ];
 
         async function loadTokenInfo() {
             try {
+                if (!signer) {
+                    alert("Najpierw połącz portfel (Krok 1)!");
+                    return;
+                }
                 const contractAddress = document.getElementById('contractAddress').value;
-                const walletAddress = document.getElementById('walletAddress').value;
-
                 if (!contractAddress) {
-                    alert("Wpisz adres kontraktu tokena!");
+                    alert("Wpisz adres kontraktu!");
                     return;
                 }
 
-                log("Pobieranie informacji o tokenie z sieci...");
-                const { provider } = await getProviderAndWallet();
+                log("Odczytywanie danych tokena...");
                 const contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
-
                 const symbol = await contract.symbol();
                 const decimals = await contract.decimals();
-                const balance = await contract.balanceOf(walletAddress);
 
                 document.getElementById('tokenSymbol').value = symbol;
                 document.getElementById('tokenDecimals').value = decimals;
-                document.getElementById('walletBalance').value = ethers.formatUnits(balance, decimals);
-
-                log(`Załadowano token: ${symbol} (Decimals: ${decimals}), Twoje saldo: ${ethers.formatUnits(balance, decimals)}`);
-                alert(`Sukces! Odczytano token ${symbol}`);
-
+                log(`Załadowano token: ${symbol} (Decimals: ${decimals})`);
+                alert(`Sukces! Znaleziono token: ${symbol}`);
             } catch (error) {
                 console.error(error);
-                log(`Błąd odczytu: ${error.message}`);
-                alert("Nie udało się odczytać tokena pod tym adresem. Sprawdź poprawność adresu.");
+                log(`Błąd: ${error.message}`);
+                alert("Nie udało się odczytać tokena pod tym adresem.");
             }
         }
 
         async function sendTokens() {
             try {
+                if (!signer) {
+                    alert("Najpierw połącz portfel!");
+                    return;
+                }
                 const contractAddress = document.getElementById('contractAddress').value;
                 const recipient = document.getElementById('recipientAddress').value;
                 const amount = document.getElementById('sendAmount').value;
                 const decimals = parseInt(document.getElementById('tokenDecimals').value) || 18;
+                const currency = document.getElementById('nativeCurrency').value;
 
                 if (!contractAddress || !recipient || !amount) {
                     alert("Wypełnij wszystkie pola w sekcji wysyłania!");
                     return;
                 }
 
-                log(`Wysyłanie ${amount} tokenów na adres ${recipient}...`);
-                const { wallet } = await getProviderAndWallet();
-
-                const contract = new ethers.Contract(contractAddress, ERC20_ABI, wallet);
+                log(`Przygotowanie przelewu ${amount} tokenów... Używana waluta sieci: ${currency}`);
+                const contract = new ethers.Contract(contractAddress, ERC20_ABI, signer);
                 const parsedAmount = ethers.parseUnits(amount, decimals);
-                
-                const tx = await contract.transfer(recipient, parsedAmount, {
-                    gasLimit: 100000
-                });
-                log(`Transakcja wysłana (Hash): ${tx.hash}`);
-                
-                await tx.wait();
-                log("Transakcja potwierdzona! Tokeny zostały wysłane.");
-                alert("Tokeny zostały pomyślnie wysłane do odbiorcy!");
 
-                // Odśwież saldo po wysyłce
-                loadTokenInfo();
+                log("Oczekiwanie na potwierdzenie w MetaMasku...");
+                const tx = await contract.transfer(recipient, parsedAmount);
+                log(`Transakcja wysłana! Hash: ${tx.hash}`);
+
+                await tx.wait();
+                log("Transakcja została potwierdzona przez sieć!");
+                alert("Tokeny zostały pomyślnie wysłane!");
 
             } catch (error) {
                 console.error(error);
                 log(`Błąd wysyłki: ${error.message}`);
-                alert("Wystąpił błąd podczas wysyłania tokenów.");
+                alert("Transakcja została odrzucona lub wystąpił błąd.");
             }
         }
     </script>
