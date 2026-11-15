@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Network Token Deployer & Sender</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js v6 CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+    <div class="max-w-3xl mx-auto space-y-6">
+        
+        <!-- Nagłówek -->
+        <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+            <h1 class="text-2xl font-bold text-emerald-400">Prywatny Generator & Wysyłacz Tokenów EVM</h1>
+            <p class="text-slate-400 text-sm mt-1">Zarządzaj swoją prywatną siecią blockchain bezpośrednio z poziomu przeglądarki.</p>
+        </header>
+
+        <!-- Sekcja Konfiguracji Sieci i Portfela -->
+        <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
+            <h2 class="text-xl font-semibold text-blue-400">1. Konfiguracja Połączenia i Portfela</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">RPC URL</label>
+                    <input type="text" id="rpcUrl" value="http://127.0.0.1:8545" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Chain ID</label>
+                    <input type="text" id="chainId" value="31337" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300">Private Key</label>
+                <input type="text" id="privateKey" value="0xc3e1e0665c07e5c5d7c1c5f3dce06284c9492502646a792089c641dd09d2ddab" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300">Wallet Address (Odczytany)</label>
+                <input type="text" id="walletAddress" value="0x6D45764bf92668fFD006855fa573A3eA017030f0" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-500 font-mono">
+            </div>
+        </section>
+
+        <!-- Sekcja Tworzenia Tokena -->
+        <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
+            <h2 class="text-xl font-semibold text-purple-400">2. Utworzenie Nowego Tokena ERC-20</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Token Name</label>
+                    <input type="text" id="tokenName" placeholder="np. My Private Token" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Token Symbol</label>
+                    <input type="text" id="tokenSymbol" placeholder="np.MPT" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Decimals</label>
+                    <input type="number" id="tokenDecimals" value="18" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Initial Supply</label>
+                    <input type="text" id="tokenSupply" value="1000000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+            </div>
+
+            <button onclick="deployToken()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Wdróż Token na Sieć
+            </button>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300">Kontrakt Wdrożonego Tokena (Contract Address)</label>
+                <input type="text" id="contractAddress" placeholder="Pojawi się tutaj po wdrożeniu lub wpisz istniejący" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-purple-500 outline-none">
+            </div>
+        </section>
+
+        <!-- Sekcja Wysyłania Tokenów -->
+        <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
+            <h2 class="text-xl font-semibold text-emerald-400">3. Wyślij Token na Dowolny Adres</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Adres Odbiorcy (Recipient)</label>
+                    <input type="text" id="recipientAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Ilość do wysłania</label>
+                    <input type="text" id="sendAmount" placeholder="100" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+            </div>
+
+            <button onclick="sendTokens()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Wyślij Tokeny
+            </button>
+        </section>
+
+        <!-- Konsola / Status -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-400 h-32 overflow-y-auto" id="consoleLog">
+            [System] Gotowy do działania...
+        </div>
+
+    </div>
+
+    <script>
+        function log(message) {
+            const consoleBox = document.getElementById('consoleLog');
+            consoleBox.innerHTML += `<div>> ${message}</div>`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        // Standardowy bytecode i ABI dla prostego kontraktu ERC20 (Standard OpenZeppelin-like w uproszczonej formie solc)
+        // Dla uproszczenia wdrożenia bezpośredniego bez kompilatora w przeglądarce, 
+        // zalecamy użycie gotowego kontraktu fabrycznego lub uproszczonego bytecode'u.
+        // Poniżej znajduje się uproszczony interfejs do wysyłania (wymaga istniejącego adresu kontraktu).
+        
+        async function getProviderAndWallet() {
+            const rpcUrl = document.getElementById('rpcUrl').value;
+            const privateKey = document.getElementById('privateKey').value;
+            
+            const provider = new ethers.JsonRpcProvider(rpcUrl);
+            const wallet = new ethers.Wallet(privateKey, provider);
+            return { provider, wallet };
+        }
+
+        async function deployToken() {
+            log("Funkcja wdrażania tokena wymaga skompilowanego bytecode'u. W sieciach prywatnych zaleca się wdrożenie kontraktu przez Hardhat/Foundry, a następnie wpisanie 'Contract Address' poniżej.");
+            alert("Wskazówka: Wklej adres już istniejącego kontraktu tokena w polu 'Contract Address' poniżej, aby zarządzać jego wysyłką.");
+        }
+
+        async function sendTokens() {
+            try {
+                const contractAddress = document.getElementById('contractAddress').value;
+                const recipient = document.getElementById('recipientAddress').value;
+                const amount = document.getElementById('sendAmount').value;
+                const decimals = parseInt(document.getElementById('tokenDecimals').value) || 18;
+
+                if (!contractAddress || !recipient || !amount) {
+                    alert("Wypełnij adres kontraktu, odbiorcę oraz ilość!");
+                    return;
+                }
+
+                log("Inicjalizacja wysyłki...");
+                const { wallet } = await getProviderAndWallet();
+
+                // Minimalne ABI dla funkcji transfer
+                const erc20Abi = [
+                    "function transfer(address to, uint256 value) public returns (bool)",
+                    "function symbol() view returns (string)"
+                ];
+
+                const contract = new ethers.Contract(contractAddress, erc20Abi, wallet);
+                
+                const parsedAmount = ethers.parseUnits(amount, decimals);
+                log(`Wysyłanie ${amount} tokenów na adres ${recipient}...`);
+
+                const tx = await contract.transfer(recipient, parsedAmount);
+                log(`Transakcja wysłana: ${tx.hash}`);
+                
+                await tx.wait();
+                log("Transakcja została pomyślnie potwierdzona!");
+                alert("Tokeny zostały wysłane pomyślnie!");
+
+            } catch (error) {
+                console.error(error);
+                log(`Błąd: ${error.message}`);
+                alert("Wystąpił błąd podczas wysyłki. Sprawdź konsolę.");
+            }
+        }
+    </script>
+</body>
+</html>
