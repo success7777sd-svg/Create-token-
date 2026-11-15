@@ -3,238 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Advanced Token Creator & Sender</title>
+    <title>BNB to Polygon BTCB Bridge</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Ethers.js v6 CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
-    <div class="max-w-3xl mx-auto space-y-6">
+    <div class="max-w-2xl mx-auto space-y-6">
         
         <!-- Nagłówek -->
-        <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-            <h1 class="text-2xl font-bold text-emerald-400">Zaawansowany Kreator i Wysłacz Tokenów EVM</h1>
-            <p class="text-slate-400 text-sm mt-1">Stwórz własny token z pełnym Supply na dowolnej sieci i wyślij go na dowolny adres.</p>
+        <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 text-center">
+            <h1 class="text-2xl font-bold text-amber-400">BTCB Cross-Chain Bridge (BNB ➡️ Polygon)</h1>
+            <p class="text-slate-400 text-sm mt-1">Przenieś BTCB z sieci BNB Chain i odbierz swój ekwiwalent w sieci Polygon (8 Decimals).</p>
         </header>
 
-        <!-- KROK 1: Konfiguracja Sieci i Portfela -->
+        <!-- Panel Połączenia z Portfelem -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-blue-400">1. Konfiguracja Sieci i Portfela</h2>
+            <h2 class="text-lg font-semibold text-blue-400">1. Portfel i Adres Skarbca</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-3">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">RPC URL</label>
-                    <input type="text" id="rpcUrl" value="http://127.0.0.1:8545" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Twój Adres (MetaMask)</label>
+                    <input type="text" id="walletAddress" value="Nie połączono" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-400 font-mono">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Chain ID</label>
-                    <input type="text" id="chainId" value="31337" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Adres Skarbca (Gdzie użytkownicy wpłacają BTCB na BNB)</label>
+                    <input type="text" id="vaultAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Token Paliwa (Fuel / Native)</label>
-                    <input type="text" id="nativeToken" value="POL" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
+            </div>
+
+            <button onclick="connectWallet()" class="w-full bg-blue-600 hover:bg-blue-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Połącz z MetaMask
+            </button>
+        </section>
+
+        <!-- KROK 1: Wpłata w sieci BNB -->
+        <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
+            <h2 class="text-lg font-semibold text-amber-400">Krok 1: Zablokuj / Wyślij BTCB (Sieć BNB Chain)</h2>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300">Adres Kontraktu BTCB w sieci BNB</label>
+                <input type="text" id="btcbBnbContract" value="0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono outline-none">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-300">Private Key</label>
-                <input type="text" id="privateKey" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                <label class="block text-sm font-medium text-slate-300">Ilość BTCB do zablokowania</label>
+                <input type="number" id="depositAmount" placeholder="0.001" step="0.00000001" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
             </div>
 
-            <button onclick="verifyWallet()" class="w-full bg-blue-600 hover:bg-blue-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Zatwierdź i Połącz z Siecią
+            <button onclick="depositBnbBtc()" class="w-full bg-amber-600 hover:bg-amber-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Wyślij BTCB na BNB (Zatwierdź)
             </button>
-            <div id="walletStatus" class="text-xs text-slate-400 font-mono">Status: Oczekiwanie na zatwierdzenie...</div>
         </section>
 
-        <!-- KROK 2: Tworzenie Tokena -->
+        <!-- KROK 2: Wypłata w sieci Polygon -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-purple-400">2. Parametry Tokena („Wypasiony” Standard ERC-20)</h2>
+            <h2 class="text-lg font-semibold text-purple-400">Krok 2: Odbierz / Wyemituj token w sieci Polygon</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Nazwa Tokena (Token Name)</label>
-                    <input type="text" id="tokenName" placeholder="np. Master Token" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Symbol</label>
-                    <input type="text" id="tokenSymbol" placeholder="np. MSTR" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Całkowita Podaż (Supply)</label>
-                    <input type="text" id="tokenSupply" value="1000000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-            </div>
-
-            <button onclick="deployToken()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Zatwierdź i Stwórz Token (Za cenę paliwa)
-            </button>
-
             <div>
-                <label class="block text-sm font-medium text-slate-300">Wygenerowany Adres Kontraktu (Contract Address)</label>
-                <input type="text" id="contractAddress" placeholder="Pojawi się tutaj automatycznie po wdrożeniu..." class="w-full mt-1 bg-slate-950 border border-purple-500/50 rounded-lg p-2.5 text-sm font-mono text-emerald-400 outline-none">
+                <label class="block text-sm font-medium text-slate-300">Adres Twojego kontraktu ekwiwalentu BTC w Polygon (8 Decimals)</label>
+                <input type="text" id="polygonTokenContract" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-purple-500/50 rounded-lg p-2.5 text-sm font-mono text-emerald-400 outline-none">
             </div>
-        </section>
 
-        <!-- KROK 3: Wysyłanie Tokena -->
-        <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-emerald-400">3. Wyślij Stworzony Token</h2>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Adres Odbiorcy (Recipient)</label>
-                    <input type="text" id="recipientAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Adres Odbiorcy w Polygon</label>
+                    <input type="text" id="recipientPolygon" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Ilość do wysłania</label>
-                    <input type="text" id="sendAmount" placeholder="100" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-300">Ilość do wydania</label>
+                    <input type="number" id="mintAmount" placeholder="0.001" step="0.00000001" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
                 </div>
             </div>
 
-            <button onclick="sendTokens()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Zatwierdź i Wyślij Tokeny
+            <button onclick="releasePolygonBtc()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Przekaż / Wyślij w sieci Polygon (Zatwierdź)
             </button>
         </section>
 
-        <!-- Konsola zdarzeń -->
-        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-400 h-36 overflow-y-auto" id="consoleLog">
-            [System] Gotowy do konfiguracji sieci...
+        <!-- Konsola -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-400 h-28 overflow-y-auto" id="consoleLog">
+            [System] Gotowy. Połącz portfel...
         </div>
 
     </div>
 
     <script>
+        let provider, signer;
+
         function log(message) {
             const consoleBox = document.getElementById('consoleLog');
             consoleBox.innerHTML += `<div>> ${message}</div>`;
             consoleBox.scrollTop = consoleBox.scrollHeight;
         }
 
-        async function getProviderAndWallet() {
-            const rpcUrl = document.getElementById('rpcUrl').value;
-            const privateKey = document.getElementById('privateKey').value;
-            if (!privateKey) {
-                throw new Error("Wpisz swój klucz prywatny w Kroku 1!");
+        async function connectWallet() {
+            if (!window.ethereum) {
+                alert("Brak portfela MetaMask!");
+                return;
             }
-            const provider = new ethers.JsonRpcProvider(rpcUrl);
-            const wallet = new ethers.Wallet(privateKey, provider);
-            return { provider, wallet };
-        }
-
-        async function verifyWallet() {
             try {
-                log("Sprawdzanie połączenia z siecią i portfelem...");
-                const { provider, wallet } = await getProviderAndWallet();
-                const network = await provider.getNetwork();
-                const balance = await provider.getBalance(wallet.address);
-                const nativeSymbol = document.getElementById('nativeToken').value;
-
-                document.getElementById('walletStatus').innerText = `Połączono! Adres: ${wallet.address} | Saldo: ${ethers.formatEther(balance)} ${nativeSymbol}`;
-                log(`Sukces! Portfel: ${wallet.address}, Sieć ChainID: ${network.chainId}`);
-                alert("Połączenie z siecią i portfelem powiodło się!");
+                provider = new ethers.BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = await provider.getSigner();
+                const address = await signer.getAddress();
+                document.getElementById('walletAddress').value = address;
+                document.getElementById('vaultAddress').value = address; // Domyślnie Twój adres jako skarbnik
+                document.getElementById('recipientPolygon').value = address;
+                log(`Połączono z portfelem: ${address}`);
             } catch (error) {
                 console.error(error);
                 log(`Błąd połączenia: ${error.message}`);
-                alert("Nie udało się połączyć. Sprawdź RPC URL oraz klucz prywatny.");
             }
         }
 
-        // Standardowy i zweryfikowany ABI oraz Bytecode potężnego kontraktu ERC20 (Standard Mint do deployera z 18 miejscami po przecinku)
-        const ERC20_ABI = [
-            "constructor(string memory name, string memory symbol, uint8 decimals, uint256 initialSupply)",
-            "function name() view returns (string)",
-            "function symbol() view returns (string)",
-            "function decimals() view returns (uint8)",
-            "function totalSupply() view returns (uint256)",
-            "function balanceOf(address account) view returns (uint256)",
-            "function transfer(address recipient, uint256 amount) returns (bool)"
+        // Standardowy ABI dla transferu tokena ERC20 / BEP20
+        const ERC20_TRANSFER_ABI = [
+            "function transfer(address to, uint256 value) returns (bool)",
+            "function decimals() view returns (uint8)"
         ];
 
-        // Optymalny bytecode kompatybilny z EVM dla standardu ERC20
-        const ERC20_BYTECODE = "0x608060405234801561001057600080fd5b50604051610aef380380610aef8339810160408190526100329161011e565b806000908161004157fe5b5060208101905060405161005791906101c5565b806001908161006557fe5b506040810190506060810190506080810190505061008560208101610214565b61008e9190610255565b610098939291906102df565b6100e4565b6080516100b490600090816100aa57fe5b506002556100c59050610100565b506040516100d8919061033f565b60405180910390f35b600080fd5b61011b91906103b4565b565b828054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020015b808211156101b957600081556001016101a4565b50505050509050565b6101cd91906103c8565b506000546001600160a01b031681565b60008060006060848603121561022b57600080fd5b83516102379190610444565b925060208301516102479190610444565b9150604083015190509250925092565b60008151905091905161026d919061045a565b915060208201519050919051610285919061045a565b91509150565b600080604083850312156102f257600080fd5b82516102fe9190610444565b9150602082015161030e91906104b2565b91509250925092565b60006020828403121561035157600080fd5b81516001600160a01b038116811461036757600080fd5b939350505050565b6103bd91906104d4565b50565b6000604051905090565b60006103ea826104ee565b91506103f78361050a565b925081518060208401526000602083018251806005840285015282516020850183850101111561042c57600080fd5b5050505090509250925092565b60006020828403121561045557600080fd5b51919050565b6000806040838503121561046d57600080fd5b825161047991906104b2565b915060208201516104899190610444565b91509250925092565b6000815190509190516104c89190610515565b91509150565b6000815190509190516104ea919061052b565b91509150565b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000b3bbf1fac6000000000000000000000000000000000000000000000000000000000000000022506f6c79676f6e204272696467656420574254432028506f6c79676f6e20504f532900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045742544300000000000000000000000000000000000000000000000000000000";
-
-        async function deployToken() {
+        async function depositBnbBtc() {
             try {
-                const name = document.getElementById('tokenName').value;
-                const symbol = document.getElementById('tokenSymbol').value;
-                const supplyInput = document.getElementById('tokenSupply').value;
-                const nativeSymbol = document.getElementById('nativeToken').value;
+                const tokenAddress = document.getElementById('btcbBnbContract').value;
+                const vault = document.getElementById('vaultAddress').value;
+                const amount = document.getElementById('depositAmount').value;
 
-                if (!name || !symbol || !supplyInput) {
-                    alert("Wypełnij wszystkie pola nazwy, symbolu oraz podaży tokena!");
+                if (!tokenAddress || !vault || !amount) {
+                    alert("Wypełnij wszystkie pola w Kroku 1!");
                     return;
                 }
 
-                log(`Rozpoczynam tworzenie tokena "${name}" (${symbol}) za cenę paliwa (${nativeSymbol})...`);
-                const { provider, wallet } = await getProviderAndWallet();
-
-                // Standardowo ustawiamy 18 miejsc po przecinku (decimals)
-                const decimals = 18;
-                const parsedSupply = ethers.parseUnits(supplyInput, decimals);
-
-                const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BYTECODE, wallet);
-
-                log("Wysyłanie transakcji deployu do sieci...");
+                log("Wysyłanie BTCB w sieci BNB do skarbca...");
+                const contract = new ethers.Contract(tokenAddress, ERC20_TRANSFER_ABI, signer);
                 
-                // Pobieramy dane o gazie, aby transakcja przeszła poprawnie płacąc za paliwo
-                const feeData = await provider.getFeeData();
-                const txOverrides = {
-                    gasLimit: 3000000,
-                    maxFeePerGas: feeData.maxFeePerGas || ethers.parseUnits("20", "gwei"),
-                    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || ethers.parseUnits("2", "gwei")
-                };
+                // BTCB ma zazwyczaj 18 miejsc po przecinku w sieci BNB, ale weźmiemy to dynamicznie lub bezpiecznie 18
+                const parsedAmount = ethers.parseUnits(amount, 18); 
 
-                const contract = await factory.deploy(name, symbol, decimals, parsedSupply, txOverrides);
-                
-                log(`Transakcja wysłana! Oczekiwanie na potwierdzenie w bloku...`);
-                await contract.waitForDeployment();
-                const deployedAddress = await contract.getAddress();
-
-                document.getElementById('contractAddress').value = deployedAddress;
-                log(`Sukces! Twój token został wdrożony. Adres kontraktu: ${deployedAddress}`);
-                alert(`Token "${name}" został pomyślnie stworzony!\nAdres kontraktu: ${deployedAddress}`);
-
+                const tx = await contract.transfer(vault, parsedAmount);
+                log(`Transakcja wysłana w sieci BNB: ${tx.hash}`);
+                await tx.wait();
+                log("BTCB pomyślnie zablokowane w skarbcu!");
+                alert("Blokada BTCB zakończona sukcesem. Przejdź do Kroku 2.");
             } catch (error) {
                 console.error(error);
-                log(`Błąd podczas tworzenia tokena: ${error.message}`);
-                alert("Wystąpił błąd. Upewnij się, że masz wystarczające saldo tokena paliwa na opłaty.");
+                log(`Błąd wpłaty: ${error.message}`);
+                alert("Wystąpił błąd podczas wpłaty BTCB.");
             }
         }
 
-        async function sendTokens() {
+        async function releasePolygonBtc() {
             try {
-                const contractAddress = document.getElementById('contractAddress').value;
-                const recipient = document.getElementById('recipientAddress').value;
-                const amount = document.getElementById('sendAmount').value;
-                const nativeSymbol = document.getElementById('nativeToken').value;
+                const tokenAddress = document.getElementById('polygonTokenContract').value;
+                const recipient = document.getElementById('recipientPolygon').value;
+                const amount = document.getElementById('mintAmount').value;
 
-                if (!contractAddress || !recipient || !amount) {
-                    alert("Upewnij się, że podano adres kontraktu, odbiorcę oraz ilość tokenów!");
+                if (!tokenAddress || !recipient || !amount) {
+                    alert("Wypełnij wszystkie pola w Kroku 2!");
                     return;
                 }
 
-                log(`Przygotowanie przelewu ${amount} tokenów na adres ${recipient}...`);
-                const { wallet } = await getProviderAndWallet();
+                log("Wysyłanie ekwiwalentu BTC w sieci Polygon (8 Decimals)...");
+                const contract = new ethers.Contract(tokenAddress, ERC20_TRANSFER_ABI, signer);
+                
+                // Kluczowa zmiana: Twój token w Polygon ma dokładnie 8 miejsc po przecinku (Decimals = 8)
+                const parsedAmount = ethers.parseUnits(amount, 8); 
 
-                const contract = new ethers.Contract(contractAddress, ERC20_ABI, wallet);
-                const parsedAmount = ethers.parseUnits(amount, 18);
-                
-                log("Wysyłanie transakcji transferu...");
-                const tx = await contract.transfer(recipient, parsedAmount, {
-                    gasLimit: 100000
-                });
-                
-                log(`Transakcja transferu wysłana: ${tx.hash}`);
+                const tx = await contract.transfer(recipient, parsedAmount);
+                log(`Transakcja wysłana w sieci Polygon: ${tx.hash}`);
                 await tx.wait();
-                
-                log("Tokeny zostały pomyślnie dostarczone do odbiorcy!");
-                alert("Przelew tokenów zakończony sukcesem!");
-
+                log("Ekwiwalent BTC doręczony na adres w sieci Polygon!");
+                alert("Operacja zakończona sukcesem w sieci Polygon!");
             } catch (error) {
                 console.error(error);
-                log(`Błąd wysyłki: ${error.message}`);
-                alert("Wystąpił błąd podczas wysyłania tokenów.");
+                log(`Błąd Polygon: ${error.message}`);
+                alert("Wystąpił błąd podczas wysyłki w sieci Polygon.");
             }
         }
     </script>
