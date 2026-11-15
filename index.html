@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Network Token Deployer & Sender</title>
+    <title>Private Network Token Manager</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Ethers.js v6 CDN -->
@@ -14,8 +14,8 @@
         
         <!-- Nagłówek -->
         <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-            <h1 class="text-2xl font-bold text-emerald-400">Prywatny Generator & Wysyłacz Tokenów EVM</h1>
-            <p class="text-slate-400 text-sm mt-1">Zarządzaj swoją prywatną siecią blockchain bezpośrednio z poziomu przeglądarki.</p>
+            <h1 class="text-2xl font-bold text-emerald-400">Prywatny Menedżer Tokenów EVM</h1>
+            <p class="text-slate-400 text-sm mt-1">Zarządzaj i wysyłaj tokeny na swojej prywatnej sieci.</p>
         </header>
 
         <!-- Sekcja Konfiguracji Sieci i Portfela -->
@@ -38,42 +38,42 @@
                 <input type="text" id="privateKey" value="0xc3e1e0665c07e5c5d7c1c5f3dce06284c9492502646a792089c641dd09d2ddab" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-300">Wallet Address (Odczytany)</label>
+                <label class="block text-sm font-medium text-slate-300">Wallet Address</label>
                 <input type="text" id="walletAddress" value="0x6D45764bf92668fFD006855fa573A3eA017030f0" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-500 font-mono">
             </div>
         </section>
 
-        <!-- Sekcja Tworzenia Tokena -->
+        <!-- Sekcja Parametrów Tokena i Kontraktu -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-purple-400">2. Utworzenie Nowego Tokena ERC-20</h2>
+            <h2 class="text-xl font-semibold text-purple-400">2. Dane Tokena i Adres Kontraktu</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-300">Token Name</label>
-                    <input type="text" id="tokenName" placeholder="np. My Private Token" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                    <input type="text" id="tokenName" placeholder="np. My Token" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300">Token Symbol</label>
-                    <input type="text" id="tokenSymbol" placeholder="np.MPT" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                    <input type="text" id="tokenSymbol" placeholder="np. MTK" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300">Decimals</label>
                     <input type="number" id="tokenDecimals" value="18" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300">Initial Supply</label>
+                    <label class="block text-sm font-medium text-slate-300">Supply</label>
                     <input type="text" id="tokenSupply" value="1000000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                 </div>
             </div>
 
-            <button onclick="deployToken()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Wdróż Token na Sieć
-            </button>
-
             <div>
-                <label class="block text-sm font-medium text-slate-300">Kontrakt Wdrożonego Tokena (Contract Address)</label>
-                <input type="text" id="contractAddress" placeholder="Pojawi się tutaj po wdrożeniu lub wpisz istniejący" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-purple-500 outline-none">
+                <label class="block text-sm font-medium text-slate-300">Contract Address (Wpisz adres swojego kontraktu)</label>
+                <input type="text" id="contractAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-purple-500 outline-none">
             </div>
+
+            <button onclick="verifyContract()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Sprawdź Token w Sieci
+            </button>
         </section>
 
         <!-- Sekcja Wysyłania Tokenów -->
@@ -110,11 +110,6 @@
             consoleBox.scrollTop = consoleBox.scrollHeight;
         }
 
-        // Standardowy bytecode i ABI dla prostego kontraktu ERC20 (Standard OpenZeppelin-like w uproszczonej formie solc)
-        // Dla uproszczenia wdrożenia bezpośredniego bez kompilatora w przeglądarce, 
-        // zalecamy użycie gotowego kontraktu fabrycznego lub uproszczonego bytecode'u.
-        // Poniżej znajduje się uproszczony interfejs do wysyłania (wymaga istniejącego adresu kontraktu).
-        
         async function getProviderAndWallet() {
             const rpcUrl = document.getElementById('rpcUrl').value;
             const privateKey = document.getElementById('privateKey').value;
@@ -124,9 +119,45 @@
             return { provider, wallet };
         }
 
-        async function deployToken() {
-            log("Funkcja wdrażania tokena wymaga skompilowanego bytecode'u. W sieciach prywatnych zaleca się wdrożenie kontraktu przez Hardhat/Foundry, a następnie wpisanie 'Contract Address' poniżej.");
-            alert("Wskazówka: Wklej adres już istniejącego kontraktu tokena w polu 'Contract Address' poniżej, aby zarządzać jego wysyłką.");
+        async function verifyContract() {
+            try {
+                const contractAddress = document.getElementById('contractAddress').value;
+                if (!contractAddress) {
+                    alert("Wpisz najpierw Contract Address!");
+                    return;
+                }
+
+                log("Łączenie z siecią i sprawdzanie kontraktu...");
+                const { provider } = await getProviderAndWallet();
+
+                const erc20Abi = [
+                    "function name() view returns (string)",
+                    "function symbol() view returns (string)",
+                    "function decimals() view returns (uint8)",
+                    "function totalSupply() view returns (uint256)"
+                ];
+
+                const contract = new ethers.Contract(contractAddress, erc20Abi, provider);
+                
+                const name = await contract.name();
+                const symbol = await contract.symbol();
+                const decimals = await contract.decimals();
+                const totalSupply = await contract.totalSupply();
+
+                // Automatyczne uzupełnienie pól na podstawie tego, co znajduje się w sieci pod tym adresem
+                document.getElementById('tokenName').value = name;
+                document.getElementById('tokenSymbol').value = symbol;
+                document.getElementById('tokenDecimals').value = decimals;
+                document.getElementById('tokenSupply').value = ethers.formatUnits(totalSupply, decimals);
+
+                log(`Sukces! Odczytano kontrakt: ${name} (${symbol})`);
+                alert(`Znaleziono token: ${name} [${symbol}]`);
+
+            } catch (error) {
+                console.error(error);
+                log(`Błąd weryfikacji: ${error.message}`);
+                alert("Nie udało się odczytać kontraktu pod tym adresem. Upewnij się, że RPC i adres są poprawne.");
+            }
         }
 
         async function sendTokens() {
@@ -141,13 +172,11 @@
                     return;
                 }
 
-                log("Inicjalizacja wysyłki...");
+                log("Inicjalizacja wysyłki tokenów...");
                 const { wallet } = await getProviderAndWallet();
 
-                // Minimalne ABI dla funkcji transfer
                 const erc20Abi = [
-                    "function transfer(address to, uint256 value) public returns (bool)",
-                    "function symbol() view returns (string)"
+                    "function transfer(address to, uint256 value) public returns (bool)"
                 ];
 
                 const contract = new ethers.Contract(contractAddress, erc20Abi, wallet);
@@ -160,11 +189,11 @@
                 
                 await tx.wait();
                 log("Transakcja została pomyślnie potwierdzona!");
-                alert("Tokeny zostały wysłane pomyślnie!");
+                alert("Tokeny zostały pomyślnie wysłane!");
 
             } catch (error) {
                 console.error(error);
-                log(`Błąd: ${error.message}`);
+                log(`Błąd wysyłki: ${error.message}`);
                 alert("Wystąpił błąd podczas wysyłki. Sprawdź konsolę.");
             }
         }
