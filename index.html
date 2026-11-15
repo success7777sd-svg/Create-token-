@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private EVM Token Deployer & Sender</title>
+    <title>Prywatny Menedżer Tokenów EVM</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Ethers.js v6 CDN -->
@@ -14,8 +14,8 @@
         
         <!-- Nagłówek -->
         <header class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-            <h1 class="text-2xl font-bold text-emerald-400">Prywatny Kreator i Menedżer Tokenów</h1>
-            <p class="text-slate-400 text-sm mt-1">Wdróż token i wyślij go na dowolny adres w swojej sieci.</p>
+            <h1 class="text-2xl font-bold text-emerald-400">Prywatna Sieć - Menedżer i Wysyłacz Tokenów</h1>
+            <p class="text-slate-400 text-sm mt-1">Zarządzaj swoim tokenem i wysyłaj go na dowolne adresy.</p>
         </header>
 
         <!-- Sekcja Konfiguracji Sieci i Portfela -->
@@ -43,42 +43,38 @@
             </div>
         </section>
 
-        <!-- Sekcja Tworzenia Tokena i Wpisywania Kontraktu -->
+        <!-- Sekcja Kontraktu i Parametrów Tokena -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-purple-400">2. Parametry Tokena i Adres Kontraktu</h2>
+            <h2 class="text-xl font-semibold text-purple-400">2. Adres Kontraktu i Szczegóły Tokena</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Token Name</label>
-                    <input type="text" id="tokenName" value="My Private Token" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Token Symbol</label>
-                    <input type="text" id="tokenSymbol" value="MPT" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Decimals</label>
-                    <input type="number" id="tokenDecimals" value="18" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300">Supply (Initial)</label>
-                    <input type="text" id="tokenSupply" value="1000000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-            </div>
-
             <div>
-                <label class="block text-sm font-medium text-slate-300">Contract Address (Wpisz lub wygeneruj)</label>
+                <label class="block text-sm font-medium text-slate-300">Contract Address (Adres wdrożonego kontraktu tokena)</label>
                 <input type="text" id="contractAddress" placeholder="0x..." class="w-full mt-1 bg-slate-900 border border-purple-500/50 rounded-lg p-2.5 text-sm font-mono text-emerald-400 outline-none focus:ring-2 focus:ring-purple-500">
             </div>
 
-            <button onclick="deployToken()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
-                Wdróż Nowy Token w Sieci
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Token Symbol</label>
+                    <input type="text" id="tokenSymbol" placeholder="np. MPT" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Decimals</label>
+                    <input type="number" id="tokenDecimals" value="18" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300">Twoje Saldo</label>
+                    <input type="text" id="walletBalance" value="0" disabled class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-400 font-mono">
+                </div>
+            </div>
+
+            <button onclick="loadTokenInfo()" class="w-full bg-purple-600 hover:bg-purple-700 font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                Załaduj / Sprawdź Token w Sieci
             </button>
         </section>
 
         <!-- Sekcja Wysyłania Tokenów -->
         <section class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 space-y-4">
-            <h2 class="text-xl font-semibold text-emerald-400">3. Wyślij Stworzony Token na Dowolny Adres</h2>
+            <h2 class="text-xl font-semibold text-emerald-400">3. Wyślij Token na Dowolny Adres</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -119,54 +115,42 @@
         }
 
         const ERC20_ABI = [
-            "constructor(string memory name, string memory symbol, uint8 decimals, uint256 initialSupply)",
             "function name() view returns (string)",
             "function symbol() view returns (string)",
             "function decimals() view returns (uint8)",
-            "function totalSupply() view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)",
             "function transfer(address recipient, uint256 amount) returns (bool)"
         ];
 
-        // Uproszczony i bezpieczny bytecode standardowego tokena ERC20
-        const ERC20_BYTECODE = "0x608060405234801561001057600080fd5b50604051610aef380380610aef8339810160408190526100329161011e565b806000908161004157fe5b5060208101905060405161005791906101c5565b806001908161006557fe5b506040810190506060810190506080810190505061008560208101610214565b61008e9190610255565b610098939291906102df565b6100e4565b6080516100b490600090816100aa57fe5b506002556100c59050610100565b506040516100d8919061033f565b60405180910390f35b600080fd5b61011b91906103b4565b565b828054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020015b808211156101b957600081556001016101a4565b50505050509050565b6101cd91906103c8565b506000546001600160a01b031681565b60008060006060848603121561022b57600080fd5b83516102379190610444565b925060208301516102479190610444565b9150604083015190509250925092565b60008151905091905161026d919061045a565b915060208201519050919051610285919061045a565b91509150565b600080604083850312156102f257600080fd5b82516102fe9190610444565b9150602082015161030e91906104b2565b91509250925092565b60006020828403121561035157600080fd5b81516001600160a01b038116811461036757600080fd5b939350505050565b6103bd91906104d4565b50565b6000604051905090565b60006103ea826104ee565b91506103f78361050a565b925081518060208401526000602083018251806005840285015282516020850183850101111561042c57600080fd5b5050505090509250925092565b60006020828403121561045557600080fd5b51919050565b6000806040838503121561046d57600080fd5b825161047991906104b2565b915060208201516104899190610444565b91509250925092565b6000815190509190516104c89190610515565b91509150565b6000815190509190516104ea919061052b565b91509150565b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b";
-
-        async function deployToken() {
+        async function loadTokenInfo() {
             try {
-                const name = document.getElementById('tokenName').value;
-                const symbol = document.getElementById('tokenSymbol').value;
-                const decimals = parseInt(document.getElementById('tokenDecimals').value);
-                const supplyInput = document.getElementById('tokenSupply').value;
+                const contractAddress = document.getElementById('contractAddress').value;
+                const walletAddress = document.getElementById('walletAddress').value;
 
-                if (!name || !symbol || !decimals || !supplyInput) {
-                    alert("Wypełnij parametry tokena!");
+                if (!contractAddress) {
+                    alert("Wpisz adres kontraktu tokena!");
                     return;
                 }
 
-                log(`Przygotowanie do wdrożenia tokena [${name} - ${symbol}]...`);
-                const { wallet } = await getProviderAndWallet();
+                log("Pobieranie informacji o tokenie z sieci...");
+                const { provider } = await getProviderAndWallet();
+                const contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
 
-                const parsedSupply = ethers.parseUnits(supplyInput, decimals);
-                const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BYTECODE, wallet);
+                const symbol = await contract.symbol();
+                const decimals = await contract.decimals();
+                const balance = await contract.balanceOf(walletAddress);
 
-                log("Wysyłanie transakcji wdrożenia (wymuszenie limitu gazu)...");
-                
-                // Wymuszenie stałego limitu gazu zapobiega błędom oszacowania (estimateGas failed) na prywatnych węzłach
-                const contract = await factory.deploy(name, symbol, decimals, parsedSupply, {
-                    gasLimit: 3000000 
-                });
-                
-                log(`Transakcja wysłana. Oczekiwanie na potwierdzenie w bloku...`);
-                await contract.waitForDeployment();
-                const deployedAddress = await contract.getAddress();
+                document.getElementById('tokenSymbol').value = symbol;
+                document.getElementById('tokenDecimals').value = decimals;
+                document.getElementById('walletBalance').value = ethers.formatUnits(balance, decimals);
 
-                document.getElementById('contractAddress').value = deployedAddress;
-                log(`Sukces! Kontrakt utworzony pod adresem: ${deployedAddress}`);
-                alert(`Token został wdrożony!\nAdres: ${deployedAddress}`);
+                log(`Załadowano token: ${symbol} (Decimals: ${decimals}), Twoje saldo: ${ethers.formatUnits(balance, decimals)}`);
+                alert(`Sukces! Odczytano token ${symbol}`);
 
             } catch (error) {
                 console.error(error);
-                log(`Błąd deployu: ${error.message}`);
-                alert("Wystąpił błąd podczas wdrażania. Upewnij się, że sieć RPC działa i portfel ma środki na gaz.");
+                log(`Błąd odczytu: ${error.message}`);
+                alert("Nie udało się odczytać tokena pod tym adresem. Sprawdź poprawność adresu.");
             }
         }
 
@@ -178,11 +162,11 @@
                 const decimals = parseInt(document.getElementById('tokenDecimals').value) || 18;
 
                 if (!contractAddress || !recipient || !amount) {
-                    alert("Upewnij się, że podano Contract Address, adres odbiorcy oraz ilość!");
+                    alert("Wypełnij wszystkie pola w sekcji wysyłania!");
                     return;
                 }
 
-                log(`Wysyłanie ${amount} tokenów z kontraktu ${contractAddress} do ${recipient}...`);
+                log(`Wysyłanie ${amount} tokenów na adres ${recipient}...`);
                 const { wallet } = await getProviderAndWallet();
 
                 const contract = new ethers.Contract(contractAddress, ERC20_ABI, wallet);
@@ -191,11 +175,14 @@
                 const tx = await contract.transfer(recipient, parsedAmount, {
                     gasLimit: 100000
                 });
-                log(`Transakcja wysłana: ${tx.hash}`);
+                log(`Transakcja wysłana (Hash): ${tx.hash}`);
                 
                 await tx.wait();
-                log("Przelew zrealizowany pomyślnie!");
-                alert("Tokeny zostały pomyślnie wysłane!");
+                log("Transakcja potwierdzona! Tokeny zostały wysłane.");
+                alert("Tokeny zostały pomyślnie wysłane do odbiorcy!");
+
+                // Odśwież saldo po wysyłce
+                loadTokenInfo();
 
             } catch (error) {
                 console.error(error);
